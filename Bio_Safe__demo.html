@@ -1,0 +1,1884 @@
+cat > /mnt/user-data/outputs/biosafe_demo.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioSafe v5.0 — Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold2: #e8c96a;
+    --dark: #080808;
+    --dark2: #0f0f0f;
+    --dark3: #161616;
+    --panel: #111111;
+    --border: #2a2a2a;
+    --green: #00ff88;
+    --red: #ff3355;
+    --cyan: #00e5ff;
+    --text: #c8c8c8;
+    --dim: #555;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .logo-icon::before, .logo-icon::after {
+    content: '';
+    position: absolute;
+    background: var(--gold);
+  }
+  .logo-icon::before { width: 1px; height: 24px; }
+  .logo-icon::after  { width: 24px; height: 1px; }
+  .logo-dot {
+    width: 5px; height: 5px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: relative; z-index: 1;
+  }
+
+  .logo-text { font-size: 1.3rem; font-weight: 700; letter-spacing: 2px; }
+  .logo-text span:first-child { color: var(--gold); }
+  .logo-text .version {
+    font-size: 0.65rem; color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    margin-left: 6px;
+  }
+
+  .header-status {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; color: var(--dim);
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    background: var(--dark2);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+  }
+
+  .nav-section {
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .nav-label {
+    font-size: 0.6rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    letter-spacing: 3px;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .nav-btn:hover { background: var(--dark3); color: var(--gold); }
+  .nav-btn.active { background: rgba(201,168,76,0.1); color: var(--gold); border-left: 2px solid var(--gold); }
+  .nav-btn .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  /* ── MAIN ── */
+  main {
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-title {
+    font-size: 1.6rem; font-weight: 700;
+    letter-spacing: 3px; color: var(--gold2);
+    margin-bottom: 0.25rem;
+  }
+  .page-sub {
+    font-size: 0.75rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .card-title {
+    font-size: 0.75rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before {
+    content: '';
+    display: block; width: 3px; height: 12px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+  /* ── FORM ELEMENTS ── */
+  input[type=text], input[type=password], select {
+    width: 100%;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 0.75rem;
+  }
+  input:focus, select:focus { border-color: var(--gold); }
+  select option { background: var(--dark2); }
+
+  label {
+    font-size: 0.72rem;
+    color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: 5px;
+    border: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-gold {
+    background: var(--gold);
+    color: #000;
+  }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid #cc2233;
+    color: var(--red);
+  }
+  .btn-danger:hover { background: rgba(255,51,85,0.1); }
+  .btn:active { transform: scale(0.98); }
+
+  /* ── SCANNER ── */
+  .scanner-box {
+    position: relative;
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scanner-corners::before, .scanner-corners::after,
+  .sc2::before, .sc2::after {
+    content: '';
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--gold);
+    border-style: solid;
+    z-index: 10;
+  }
+  .scanner-corners::before { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+  .scanner-corners::after  { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+  .sc2::before { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+  .sc2::after  { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
+
+  .scan-line {
+    position: absolute;
+    left: 12px; right: 12px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    top: 20%;
+    animation: scanDown 3s ease-in-out infinite;
+    display: none;
+  }
+  @keyframes scanDown {
+    0%   { top: 15%; opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 85%; opacity: 0; }
+  }
+
+  .scan-placeholder {
+    text-align: center;
+    color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 2rem;
+  }
+  .scan-placeholder .hand-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 1rem;
+    opacity: 0.2;
+  }
+
+  /* Hand drawing canvas */
+  #handCanvas { display: block; width: 100%; height: 100%; }
+
+  /* ── METRICS ── */
+  .metric {
+    background: var(--dark3);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .metric-val {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--gold2);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .metric-lbl {
+    font-size: 0.62rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    margin-bottom: 1rem;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--dim);
+    margin-bottom: 5px;
+  }
+  .progress-track {
+    background: var(--dark3);
+    border-radius: 3px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--gold);
+    transition: width 0.4s ease;
+  }
+  .progress-bar.green { background: var(--green); }
+  .progress-bar.red   { background: var(--red); }
+  .progress-bar.cyan  { background: var(--cyan); }
+
+  /* ── ACCESS RESULT ── */
+  .result-banner {
+    display: none;
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+  }
+  .result-banner.granted {
+    background: rgba(0,255,136,0.08);
+    border: 1px solid var(--green);
+  }
+  .result-banner.denied {
+    background: rgba(255,51,85,0.08);
+    border: 1px solid var(--red);
+  }
+  .result-title {
+    font-size: 1.4rem; font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .granted .result-title { color: var(--green); }
+  .denied  .result-title { color: var(--red); }
+  .result-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--dim);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── USER TABLE ── */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  tr:hover td { background: var(--dark3); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.65rem;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .badge-green { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+  .badge-red   { background: rgba(255,51,85,0.1);  color: var(--red);   border: 1px solid rgba(255,51,85,0.3); }
+  .badge-gold  { background: rgba(201,168,76,0.1); color: var(--gold);  border: 1px solid rgba(201,168,76,0.3); }
+
+  /* ── FRACTAL CANVAS ── */
+  .fractal-wrap {
+    background: #050505;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    height: 220px;
+  }
+  #fractalCanvas { display: block; }
+
+  /* ── LOG ── */
+  .log-entry {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid #161616;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+  }
+  .log-time { color: var(--dim); white-space: nowrap; }
+  .log-type { min-width: 70px; }
+  .log-msg  { color: var(--text); }
+
+  /* ── SECURITY EVENTS ── */
+  .event-row {
+    display: flex; gap: 10px; align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid #161616;
+    font-size: 0.8rem;
+  }
+  .sev-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .sev-critical { background: var(--red); }
+  .sev-high     { background: #ff8800; }
+  .sev-medium   { background: #ffcc00; }
+  .sev-info     { background: var(--cyan); }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    background: var(--dark2);
+    border-left: 1px solid var(--border);
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+  .rp-title {
+    font-size: 0.65rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+  }
+
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .stat-key { font-size: 0.75rem; color: var(--dim); }
+  .stat-val { font-family: 'Share Tech Mono', monospace; font-size: 0.82rem; color: var(--gold2); }
+
+  .mini-fractal-item {
+    background: var(--dark3);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    border: 1px solid transparent;
+  }
+  .mini-fractal-item:hover { border-color: var(--gold); }
+  .mini-thumb {
+    width: 40px; height: 40px;
+    border-radius: 4px;
+    background: #050505;
+    flex-shrink: 0;
+  }
+  .mini-info { font-size: 0.75rem; }
+  .mini-name { color: var(--text); margin-bottom: 2px; }
+  .mini-meta { color: var(--dim); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; }
+
+  /* ── ALERT ── */
+  .alert {
+    padding: 10px 14px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  .alert.show { display: block; }
+  .alert-warn { background: rgba(255,136,0,0.1); border: 1px solid #ff8800; color: #ffaa44; }
+  .alert-ok   { background: rgba(0,255,136,0.08); border: 1px solid var(--green); color: var(--green); }
+  .alert-err  { background: rgba(255,51,85,0.08); border: 1px solid var(--red); color: var(--red); }
+
+  /* ── SETTINGS TOGGLE ── */
+  .toggle-wrap { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
+  .toggle-lbl { font-size: 0.85rem; }
+  .toggle-sub { font-size: 0.7rem; color: var(--dim); }
+  .toggle {
+    position: relative;
+    width: 44px; height: 22px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: #2a2a2a;
+    border-radius: 11px;
+    transition: background 0.2s;
+  }
+  .toggle-track::after {
+    content: '';
+    position: absolute;
+    width: 16px; height: 16px;
+    left: 3px; top: 3px;
+    background: #555;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+  .toggle input:checked ~ .toggle-track { background: rgba(201,168,76,0.3); }
+  .toggle input:checked ~ .toggle-track::after { left: 25px; background: var(--gold); }
+
+  /* ── MINI CHART ── */
+  .mini-chart { height: 60px; display: flex; align-items: flex-end; gap: 3px; padding: 0; }
+  .mini-bar {
+    flex: 1;
+    background: rgba(201,168,76,0.3);
+    border-radius: 2px 2px 0 0;
+    transition: background 0.2s;
+  }
+  .mini-bar:hover { background: var(--gold); }
+
+  /* ── RESPONSIVE SCROLLBARS ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+  /* ── TOOLTIP ── */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 999;
+    font-family: 'Share Tech Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon"><div class="logo-dot"></div></div>
+    <div class="logo-text">
+      <span>Bio</span><span>Safe</span>
+      <span class="version">v5.0 ULTIMATE</span>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="status-dot"></div>
+    <span id="headerClock"></span>
+    &nbsp;|&nbsp; SYSTEM ONLINE &nbsp;|&nbsp; <span id="userCount">3</span> USERS
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="nav-section">
+    <div class="nav-label">BIOMETRIC</div>
+    <button class="nav-btn active" onclick="showPage('register', this)">
+      <span class="icon">✋</span> REGISTER
+    </button>
+    <button class="nav-btn" onclick="showPage('verify', this)">
+      <span class="icon">🔐</span> VERIFY
+    </button>
+    <button class="nav-btn" onclick="showPage('fractal', this)">
+      <span class="icon">🔷</span> FRACTAL LAB
+    </button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">MANAGEMENT</div>
+    <button class="nav-btn" onclick="showPage('users', this)">
+      <span class="icon">👥</span> USERS
+    </button>
+    <button class="nav-btn" onclick="showPage('stats', this)">
+      <span class="icon">📊</span> STATISTICS
+    </button>
+    <button class="nav-btn" onclick="showPage('security', this)">
+      <span class="icon">🛡</span> SECURITY
+    </button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">SYSTEM</div>
+    <button class="nav-btn" onclick="showPage('logs', this)">
+      <span class="icon">📋</span> ACCESS LOGS
+    </button>
+    <button class="nav-btn" onclick="showPage('backup', this)">
+      <span class="icon">💾</span> BACKUP
+    </button>
+    <button class="nav-btn" onclick="showPage('settings', this)">
+      <span class="icon">⚙</span> SETTINGS
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+
+<!-- ═══════════════ REGISTER ═══════════════ -->
+<div id="page-register" class="page active">
+  <div class="page-title">HAND REGISTRATION</div>
+  <div class="page-sub">// SCAN & ENROLL NEW BIOMETRIC PROFILE</div>
+
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">SCANNER INPUT</div>
+        <div class="scanner-box scanner-corners sc2" id="regScanner">
+          <div class="scan-line" id="regScanLine"></div>
+          <canvas id="handCanvas" width="400" height="300"></canvas>
+          <div class="scan-placeholder" id="regPlaceholder">
+            <span class="hand-icon">✋</span>
+            AWAITING HAND DETECTION<br><br>
+            Click "START SCAN" to simulate
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="progress-wrap" id="regQualityWrap" style="display:none">
+            <div class="progress-label"><span>QUALITY</span><span id="regQualityPct">0%</span></div>
+            <div class="progress-track"><div class="progress-bar green" id="regQualityBar" style="width:0%"></div></div>
+          </div>
+          <div class="progress-wrap" id="regSamplesWrap" style="display:none">
+            <div class="progress-label"><span>SAMPLES COLLECTED</span><span id="regSamplePct">0/5</span></div>
+            <div class="progress-track"><div class="progress-bar cyan" id="regSampleBar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">BIOMETRIC METRICS</div>
+        <div class="grid3" id="regMetrics" style="opacity:0.3">
+          <div class="metric">
+            <span class="metric-val" id="mBioVal">—</span>
+            <div class="metric-lbl">BIO VALUE</div>
+          </div>
+          <div class="metric">
+            <span class="metric-val" id="mStability">—</span>
+            <div class="metric-lbl">STABILITY</div>
+          </div>
+          <div class="metric">
+            <span class="metric-val" id="mQuality">—</span>
+            <div class="metric-lbl">QUALITY %</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">USER DETAILS</div>
+        <label>USERNAME</label>
+        <input type="text" id="regUsername" placeholder="e.g. john_doe">
+        <label>FRACTAL TYPE</label>
+        <select id="regFractalType">
+          <option value="sierpinski">Sierpinski Triangle</option>
+          <option value="barnsley">Barnsley Fern</option>
+          <option value="dragon">Dragon Curve</option>
+        </select>
+        <label>COLOR SCHEME</label>
+        <select id="regColorScheme">
+          <option value="cyan">Cyan</option>
+          <option value="gold">Gold</option>
+          <option value="matrix">Matrix</option>
+          <option value="fire">Fire</option>
+          <option value="purple">Purple</option>
+          <option value="pink">Pink</option>
+        </select>
+        <div style="display:flex;gap:8px;margin-top:0.5rem;">
+          <button class="btn btn-gold" id="regStartBtn" onclick="startRegistration()">START SCAN</button>
+          <button class="btn btn-outline" onclick="resetRegistration()">RESET</button>
+        </div>
+      </div>
+
+      <div id="regResult" class="result-banner"></div>
+
+      <div class="card" id="regFractalCard" style="display:none">
+        <div class="card-title">GENERATED FRACTAL SIGNATURE</div>
+        <div class="fractal-wrap">
+          <canvas id="regFractalCanvas" width="300" height="200"></canvas>
+        </div>
+        <div style="margin-top:0.75rem;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--dim);">
+          SIGNATURE ID: <span id="regSigId" style="color:var(--gold)"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ VERIFY ═══════════════ -->
+<div id="page-verify" class="page">
+  <div class="page-title">BIOMETRIC VERIFICATION</div>
+  <div class="page-sub">// AUTHENTICATE AGAINST ENROLLED PROFILE</div>
+
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">LIVE SCAN</div>
+        <div class="scanner-box scanner-corners sc2" id="verScanner">
+          <div class="scan-line" id="verScanLine"></div>
+          <canvas id="verCanvas" width="400" height="300"></canvas>
+          <div class="scan-placeholder" id="verPlaceholder">
+            <span class="hand-icon">✋</span>
+            SELECT USER & START VERIFICATION
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="progress-wrap" id="verConfWrap" style="display:none">
+            <div class="progress-label"><span>CONFIDENCE</span><span id="verConfPct">0%</span></div>
+            <div class="progress-track"><div class="progress-bar" id="verConfBar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">COMPARISON</div>
+        <div style="display:flex;gap:1rem;align-items:center;">
+          <div style="flex:1;text-align:center">
+            <div style="font-size:0.65rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px;">ENROLLED</div>
+            <canvas id="verEnrolledFractal" width="120" height="120" style="border-radius:5px;background:#050505;display:block;margin:auto"></canvas>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:2rem;color:var(--dim)" id="verMatchIcon">↔</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--dim)" id="verMatchPct">—</div>
+          </div>
+          <div style="flex:1;text-align:center">
+            <div style="font-size:0.65rem;color:var(--dim);font-family:'Share Tech Mono',monospace;margin-bottom:6px;">LIVE</div>
+            <canvas id="verLiveFractal" width="120" height="120" style="border-radius:5px;background:#050505;display:block;margin:auto"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">SELECT USER</div>
+        <label>TARGET USER</label>
+        <select id="verUserSelect" onchange="onVerUserChange()">
+          <option value="">-- select user --</option>
+        </select>
+        <div style="height:0.5rem"></div>
+        <button class="btn btn-gold" onclick="startVerification()" id="verStartBtn">START VERIFICATION</button>
+      </div>
+
+      <div id="verResult" class="result-banner"></div>
+
+      <div class="card">
+        <div class="card-title">SESSION STATS</div>
+        <div class="stat-row"><span class="stat-key">ATTEMPTS TODAY</span><span class="stat-val" id="vAttempts">0</span></div>
+        <div class="stat-row"><span class="stat-key">SUCCESS RATE</span><span class="stat-val" id="vSuccessRate">—</span></div>
+        <div class="stat-row"><span class="stat-key">AVG CONFIDENCE</span><span class="stat-val" id="vAvgConf">—</span></div>
+        <div class="stat-row"><span class="stat-key">LAST ATTEMPT</span><span class="stat-val" id="vLastAttempt">—</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">THRESHOLD SETTINGS</div>
+        <div class="progress-label"><span style="font-size:0.7rem;color:var(--dim)">MATCH THRESHOLD</span><span style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--gold)" id="thresholdVal">90%</span></div>
+        <input type="range" min="50" max="99" value="90" id="thresholdRange"
+          style="width:100%;margin:8px 0;accent-color:var(--gold)"
+          oninput="document.getElementById('thresholdVal').textContent=this.value+'%'">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FRACTAL LAB ═══════════════ -->
+<div id="page-fractal" class="page">
+  <div class="page-title">FRACTAL LABORATORY</div>
+  <div class="page-sub">// BIOMETRIC SIGNATURE VISUALIZATION ENGINE</div>
+
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">PARAMETERS</div>
+        <label>BIOMETRIC VALUE (0.0 – 1.0)</label>
+        <input type="range" min="0" max="100" value="42" id="bioSlider"
+          style="width:100%;margin:8px 0 1rem;accent-color:var(--gold)"
+          oninput="updateFractalLab()">
+        <label>FRACTAL TYPE</label>
+        <select id="labFractalType" onchange="updateFractalLab()">
+          <option value="sierpinski">Sierpinski Triangle</option>
+          <option value="barnsley">Barnsley Fern</option>
+          <option value="dragon">Dragon Curve</option>
+          <option value="mandelbrot">Mandelbrot Border</option>
+        </select>
+        <label>COLOR SCHEME</label>
+        <select id="labColor" onchange="updateFractalLab()">
+          <option value="cyan">Cyan</option>
+          <option value="gold">Gold</option>
+          <option value="matrix">Matrix</option>
+          <option value="fire">Fire</option>
+          <option value="purple">Purple</option>
+          <option value="rainbow">Rainbow</option>
+        </select>
+        <div style="height:0.5rem"></div>
+        <button class="btn btn-gold" onclick="runFractalAnalysis()">ANALYZE</button>
+      </div>
+
+      <div class="card" id="labAnalysis" style="display:none">
+        <div class="card-title">ANALYSIS RESULT</div>
+        <div class="stat-row"><span class="stat-key">BIO VALUE</span><span class="stat-val" id="aBioVal">—</span></div>
+        <div class="stat-row"><span class="stat-key">COMPLEXITY</span><span class="stat-val" id="aComplex">—</span></div>
+        <div class="stat-row"><span class="stat-key">UNIQUENESS</span><span class="stat-val" id="aUnique">—</span></div>
+        <div class="stat-row"><span class="stat-key">FRACTAL DIM.</span><span class="stat-val" id="aFracDim">—</span></div>
+        <div class="stat-row"><span class="stat-key">ENTROPY</span><span class="stat-val" id="aEntropy">—</span></div>
+        <div class="stat-row"><span class="stat-key">PATTERN CLASS</span><span class="stat-val" id="aPattern">—</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">LIVE RENDER</div>
+        <div class="fractal-wrap" style="height:320px">
+          <canvas id="labCanvas" width="400" height="300"></canvas>
+        </div>
+        <div style="margin-top:0.75rem;font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--dim);display:flex;justify-content:space-between">
+          <span>SEED: <span id="labSeed" style="color:var(--gold)">—</span></span>
+          <span>DIM: <span id="labDim" style="color:var(--gold)">—</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ USERS ═══════════════ -->
+<div id="page-users" class="page">
+  <div class="page-title">USER MANAGEMENT</div>
+  <div class="page-sub">// ENROLLED BIOMETRIC PROFILES</div>
+
+  <div id="usersAlert" class="alert"></div>
+  <div class="card">
+    <div class="card-title">ENROLLED USERS</div>
+    <table>
+      <thead>
+        <tr>
+          <th>USERNAME</th>
+          <th>REGISTERED</th>
+          <th>FRACTAL TYPE</th>
+          <th>BIO VALUE</th>
+          <th>STATUS</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody id="usersTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ STATS ═══════════════ -->
+<div id="page-stats" class="page">
+  <div class="page-title">SYSTEM STATISTICS</div>
+  <div class="page-sub">// BIOMETRIC ACCESS ANALYTICS</div>
+
+  <div class="grid3" style="margin-bottom:1.5rem">
+    <div class="metric" style="background:var(--panel);border:1px solid var(--border)">
+      <span class="metric-val" id="sTotalUsers">—</span>
+      <div class="metric-lbl">TOTAL USERS</div>
+    </div>
+    <div class="metric" style="background:var(--panel);border:1px solid var(--border)">
+      <span class="metric-val" id="sTotalAttempts">—</span>
+      <div class="metric-lbl">TOTAL ATTEMPTS</div>
+    </div>
+    <div class="metric" style="background:var(--panel);border:1px solid var(--border)">
+      <span class="metric-val" id="sSuccessRate">—</span>
+      <div class="metric-lbl">SUCCESS RATE</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">DAILY ACTIVITY</div>
+      <div class="mini-chart" id="dailyChart"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--dim)">
+        <span>7 DAYS AGO</span><span>TODAY</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">SUCCESS vs FAILED</div>
+      <canvas id="pieCanvas" width="200" height="160" style="display:block;margin:auto"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">USER BREAKDOWN</div>
+    <table>
+      <thead>
+        <tr><th>USERNAME</th><th>ATTEMPTS</th><th>SUCCESS</th><th>FAILED</th><th>AVG CONFIDENCE</th><th>LAST ACCESS</th></tr>
+      </thead>
+      <tbody id="statsTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ SECURITY ═══════════════ -->
+<div id="page-security" class="page">
+  <div class="page-title">SECURITY MANAGER</div>
+  <div class="page-sub">// EVENTS, LOCKOUTS & THREAT MONITORING</div>
+
+  <div class="grid3" style="margin-bottom:1.5rem">
+    <div class="metric" style="background:rgba(255,51,85,0.05);border:1px solid rgba(255,51,85,0.2)">
+      <span class="metric-val" style="color:var(--red)" id="secCritical">0</span>
+      <div class="metric-lbl">CRITICAL</div>
+    </div>
+    <div class="metric" style="background:rgba(255,136,0,0.05);border:1px solid rgba(255,136,0,0.2)">
+      <span class="metric-val" style="color:#ff8800" id="secHigh">0</span>
+      <div class="metric-lbl">HIGH</div>
+    </div>
+    <div class="metric" style="background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.2)">
+      <span class="metric-val" style="color:var(--cyan)" id="secInfo">0</span>
+      <div class="metric-lbl">INFO</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SECURITY EVENTS</div>
+    <div id="secEventList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">LOCKED USERS</div>
+    <div id="lockedList" style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--dim)">
+      No locked users.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ LOGS ═══════════════ -->
+<div id="page-logs" class="page">
+  <div class="page-title">ACCESS LOGS</div>
+  <div class="page-sub">// REAL-TIME BIOMETRIC EVENT STREAM</div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="card-title" style="margin:0">LIVE LOG STREAM</div>
+      <button class="btn btn-outline" style="padding:5px 14px;font-size:0.75rem" onclick="clearLogs()">CLEAR</button>
+    </div>
+    <div id="logStream"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ BACKUP ═══════════════ -->
+<div id="page-backup" class="page">
+  <div class="page-title">BACKUP MANAGER</div>
+  <div class="page-sub">// DATABASE INTEGRITY & RECOVERY</div>
+
+  <div id="backupAlert" class="alert"></div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">CREATE BACKUP</div>
+      <p style="font-size:0.82rem;color:var(--dim);margin-bottom:1rem;line-height:1.6">
+        Creates a SHA-256 verified snapshot of the biometric database with timestamp metadata.
+      </p>
+      <button class="btn btn-gold" onclick="createBackup()">CREATE BACKUP NOW</button>
+    </div>
+    <div class="card">
+      <div class="card-title">AUTO BACKUP</div>
+      <div class="toggle-wrap">
+        <div><div class="toggle-lbl">Automatic Backup</div><div class="toggle-sub">Every 24 hours</div></div>
+        <label class="toggle"><input type="checkbox" id="autoBackup" checked><span class="toggle-track"></span></label>
+      </div>
+      <div class="toggle-wrap">
+        <div><div class="toggle-lbl">Exit Backup</div><div class="toggle-sub">Backup on shutdown</div></div>
+        <label class="toggle"><input type="checkbox" id="exitBackup" checked><span class="toggle-track"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">BACKUP HISTORY</div>
+    <table>
+      <thead><tr><th>FILENAME</th><th>TIMESTAMP</th><th>SIZE</th><th>HASH (SHA-256)</th><th>ACTION</th></tr></thead>
+      <tbody id="backupTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS ═══════════════ -->
+<div id="page-settings" class="page">
+  <div class="page-title">SYSTEM SETTINGS</div>
+  <div class="page-sub">// CONFIGURATION & PREFERENCES</div>
+
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <div class="card-title">DISPLAY</div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">Hand Skeleton Overlay</div><div class="toggle-sub">Draw joint connections on scan</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">Positioning Guide</div><div class="toggle-sub">Show alignment arrows</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">Quality Bar</div><div class="toggle-sub">Live quality indicator</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SECURITY POLICY</div>
+        <label>MAX FAILED ATTEMPTS</label>
+        <select style="margin-bottom:0.75rem">
+          <option>3</option><option>5</option><option>10</option>
+        </select>
+        <label>LOCKOUT DURATION</label>
+        <select style="margin-bottom:0.75rem">
+          <option>5 minutes</option><option>15 minutes</option><option>30 minutes</option><option>1 hour</option>
+        </select>
+        <label>MATCH THRESHOLD</label>
+        <select>
+          <option>90%</option><option>85%</option><option>80%</option><option>95%</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">NOTIFICATIONS</div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">Login Alerts</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">Failed Login Alerts</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">Suspicious Activity</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+        <div class="toggle-wrap">
+          <div><div class="toggle-lbl">New User Registration</div></div>
+          <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">SYSTEM INFO</div>
+        <div class="stat-row"><span class="stat-key">VERSION</span><span class="stat-val">5.0 ULTIMATE</span></div>
+        <div class="stat-row"><span class="stat-key">BUILD</span><span class="stat-val">2025</span></div>
+        <div class="stat-row"><span class="stat-key">FRACTAL ENGINE</span><span class="stat-val">FractalGenerator v4</span></div>
+        <div class="stat-row"><span class="stat-key">HAND DETECTOR</span><span class="stat-val">MediaPipe v3.0</span></div>
+        <div class="stat-row"><span class="stat-key">LANGUAGES</span><span class="stat-val">EN / TR / DE / FR / ES</span></div>
+        <div class="stat-row"><span class="stat-key">TOTAL FEATURES</span><span class="stat-val">50</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="rp-title">LIVE SYSTEM</div>
+
+  <div style="margin-bottom:1.5rem">
+    <div class="stat-row"><span class="stat-key">UPTIME</span><span class="stat-val" id="rpUptime">00:00:00</span></div>
+    <div class="stat-row"><span class="stat-key">USERS</span><span class="stat-val" id="rpUsers">3</span></div>
+    <div class="stat-row"><span class="stat-key">BACKUPS</span><span class="stat-val" id="rpBackups">2</span></div>
+    <div class="stat-row"><span class="stat-key">LAST LOGIN</span><span class="stat-val" id="rpLastLogin">—</span></div>
+    <div class="stat-row"><span class="stat-key">SEC EVENTS</span><span class="stat-val" id="rpSecEvents">5</span></div>
+  </div>
+
+  <div class="rp-title">FRACTAL GALLERY</div>
+  <div id="galleryList"></div>
+</div>
+
+</div><!-- /layout -->
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const DB = {
+  users: [
+    { username: 'alice',   registered: '2025-05-20 09:12:44', fractalType: 'sierpinski', color: 'cyan',   bioVal: 0.4231, attempts: 14, success: 13, failed: 1,  locked: false },
+    { username: 'bob',     registered: '2025-05-21 14:38:02', fractalType: 'barnsley',   color: 'gold',   bioVal: 0.7654, attempts: 8,  success: 8,  failed: 0,  locked: false },
+    { username: 'charlie', registered: '2025-05-22 11:05:19', fractalType: 'dragon',     color: 'matrix', bioVal: 0.2087, attempts: 5,  success: 4,  failed: 1,  locked: false },
+  ],
+  logs: [
+    { time: '09:12:44', type: 'REGISTER', user: 'alice',   msg: 'New user enrolled successfully', ok: true },
+    { time: '09:45:11', type: 'LOGIN',    user: 'alice',   msg: 'Access granted — confidence 94%', ok: true },
+    { time: '14:38:02', type: 'REGISTER', user: 'bob',     msg: 'New user enrolled successfully', ok: true },
+    { time: '15:22:30', type: 'LOGIN',    user: 'bob',     msg: 'Access granted — confidence 98%', ok: true },
+    { time: '16:01:55', type: 'LOGIN',    user: 'alice',   msg: 'Access DENIED — low confidence 61%', ok: false },
+    { time: '16:02:10', type: 'SECURITY', user: 'alice',   msg: 'Failed attempt recorded', ok: false },
+    { time: '16:03:00', type: 'LOGIN',    user: 'alice',   msg: 'Access granted — confidence 91%', ok: true },
+  ],
+  secEvents: [
+    { sev: 'critical', user: 'unknown',  event: 'UNAUTHORIZED_ACCESS', detail: 'Unrecognized hand geometry', time: '16:01:55' },
+    { sev: 'high',     user: 'alice',    event: 'USER_LOCKED',          detail: '3 consecutive failed attempts', time: '08:34:12' },
+    { sev: 'info',     user: 'SYSTEM',   event: 'BACKUP_CREATED',       detail: 'backup_20250522_090000.json', time: '09:00:00' },
+    { sev: 'info',     user: 'SYSTEM',   event: 'BACKUP_CREATED',       detail: 'backup_20250523_090000.json', time: '09:00:00' },
+    { sev: 'high',     user: 'charlie',  event: 'SUSPICIOUS_ACTIVITY',  detail: '2 failed attempts in 1 min', time: '11:47:09' },
+  ],
+  backups: [
+    { name: 'backup_20250523_090000.json', time: '2025-05-23 09:00:00', size: '4.2 KB', hash: 'a3f9c1d...e7b2' },
+    { name: 'backup_20250522_090000.json', time: '2025-05-22 09:00:00', size: '3.8 KB', hash: '7c42d0e...f1a9' },
+  ],
+  verStats: { attempts: 0, success: 0, totalConf: 0 },
+};
+
+let regState = { running: false, samples: 0, bioVal: 0, interval: null };
+let verState = { running: false, interval: null };
+let startTime = Date.now();
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  if (id === 'users')    renderUsers();
+  if (id === 'stats')    renderStats();
+  if (id === 'security') renderSecurity();
+  if (id === 'logs')     renderLogs();
+  if (id === 'backup')   renderBackups();
+  if (id === 'fractal')  { setTimeout(updateFractalLab, 100); }
+}
+
+// ══════════════════════════════════════════
+//  CLOCK & UPTIME
+// ══════════════════════════════════════════
+setInterval(() => {
+  const now = new Date();
+  document.getElementById('headerClock').textContent =
+    now.toTimeString().slice(0,8);
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const h = String(Math.floor(elapsed/3600)).padStart(2,'0');
+  const m = String(Math.floor((elapsed%3600)/60)).padStart(2,'0');
+  const s = String(elapsed%60).padStart(2,'0');
+  document.getElementById('rpUptime').textContent = `${h}:${m}:${s}`;
+}, 1000);
+
+// ══════════════════════════════════════════
+//  FRACTAL DRAWING ENGINE (pure JS/Canvas)
+// ══════════════════════════════════════════
+const COLORS = {
+  cyan:    { fg: '#00FFFF', bg: '#050510', alpha: 0.8 },
+  gold:    { fg: '#FFD700', bg: '#0a0800', alpha: 0.85 },
+  matrix:  { fg: '#00FF41', bg: '#050505', alpha: 0.9 },
+  fire:    { fg: '#FF4500', bg: '#0a0000', alpha: 0.85 },
+  purple:  { fg: '#BF5FFF', bg: '#08000f', alpha: 0.85 },
+  pink:    { fg: '#FF69B4', bg: '#0a0008', alpha: 0.85 },
+  rainbow: { fg: null,       bg: '#050505', alpha: 0.8 },
+};
+
+function seededRand(seed) {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function drawFractal(canvas, bioVal, fractalType, colorScheme) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const scheme = COLORS[colorScheme] || COLORS.cyan;
+  ctx.fillStyle = scheme.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const seed = Math.abs(Math.round(bioVal * 99999999)) % 2147483647 || 1;
+  const rand = seededRand(seed);
+
+  if (fractalType === 'sierpinski') drawSierpinski(ctx, W, H, bioVal, rand, scheme);
+  else if (fractalType === 'barnsley') drawBarnsley(ctx, W, H, bioVal, rand, scheme);
+  else if (fractalType === 'dragon') drawDragon(ctx, W, H, bioVal, rand, scheme);
+  else if (fractalType === 'mandelbrot') drawMandelbrot(ctx, W, H, bioVal, scheme);
+  else drawSierpinski(ctx, W, H, bioVal, rand, scheme);
+}
+
+function drawSierpinski(ctx, W, H, val, rand, scheme) {
+  const r = val * Math.PI * 0.5;
+  const cos = Math.cos(r), sin = Math.sin(r);
+  const verts = [
+    [0.5 + 0*cos - 0*sin, 0.15 + 0*sin + 0*cos],
+    [0.5 + 0.45*cos - 0*sin, 0.85 + 0.45*sin + 0*cos],
+    [0.5 + (-0.45)*cos - 0*sin, 0.85 + (-0.45)*sin + 0*cos],
+  ];
+  let cx = 0.5, cy = 0.5;
+  for (let i = 0; i < 5500; i++) {
+    const v = verts[Math.floor(rand() * 3)];
+    cx = (cx + v[0]) / 2;
+    cy = (cy + v[1]) / 2;
+    if (i < 200) continue;
+    const px = cx * W, py = cy * H;
+    if (scheme.fg) {
+      ctx.fillStyle = scheme.fg;
+      ctx.globalAlpha = scheme.alpha * 0.7;
+    } else {
+      ctx.fillStyle = `hsl(${(i/55*3)%360},100%,70%)`;
+      ctx.globalAlpha = 0.6;
+    }
+    ctx.fillRect(px, py, 1.2, 1.2);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawBarnsley(ctx, W, H, val, rand, scheme) {
+  const transforms = [
+    (x,y) => [0, 0.16*y + val*0.1*y],
+    (x,y) => [0.85*x + 0.04*y, -0.04*x + 0.85*y + 1.6],
+    (x,y) => [0.20*x - 0.26*y, 0.23*x + 0.22*y + 1.6],
+    (x,y) => [-0.15*x + 0.28*y, 0.26*x + 0.24*y + 0.44],
+  ];
+  const probs = [0.01, 0.86, 0.93, 1.0];
+  let x = 0, y = 0;
+  const pts = [];
+  for (let i = 0; i < 5000; i++) {
+    const r2 = rand();
+    let t = transforms[r2 < probs[0] ? 0 : r2 < probs[1] ? 1 : r2 < probs[2] ? 2 : 3];
+    [x, y] = t(x, y);
+    if (i > 50) pts.push([x, y]);
+  }
+  const xs = pts.map(p=>p[0]), ys = pts.map(p=>p[1]);
+  const mnx = Math.min(...xs), mxx = Math.max(...xs);
+  const mny = Math.min(...ys), mxy = Math.max(...ys);
+  ctx.globalAlpha = scheme.alpha * 0.7;
+  pts.forEach(([px,py], i) => {
+    const sx = (px-mnx)/(mxx-mnx)*W*0.85 + W*0.075;
+    const sy = H - ((py-mny)/(mxy-mny)*H*0.92 + H*0.04);
+    if (scheme.fg) ctx.fillStyle = scheme.fg;
+    else ctx.fillStyle = `hsl(${(i/50*2)%360},100%,65%)`;
+    ctx.fillRect(sx, sy, 1.2, 1.2);
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawDragon(ctx, W, H, val, rand, scheme) {
+  let x = 0, y = 0;
+  const pts = [[x,y]];
+  const n = Math.min(12 + Math.floor(val*4), 14);
+  let angle = 0;
+  for (let i = 1; i < Math.pow(2, n); i++) {
+    const bit = (((i & (-i)) << 1) & i) === 0 ? 1 : -1;
+    angle += 90 * bit;
+    const rad = angle * Math.PI / 180;
+    x += Math.cos(rad) * 0.05;
+    y += Math.sin(rad) * 0.05;
+    pts.push([x,y]);
+    if (pts.length > 3000) break;
+  }
+  const xs = pts.map(p=>p[0]), ys = pts.map(p=>p[1]);
+  const mnx = Math.min(...xs), mxx = Math.max(...xs);
+  const mny = Math.min(...ys), mxy = Math.max(...ys);
+  const rx = mxx-mnx||1, ry = mxy-mny||1;
+  ctx.globalAlpha = scheme.alpha;
+  ctx.strokeStyle = scheme.fg || '#00FFFF';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  pts.forEach(([px,py],i) => {
+    const sx = (px-mnx)/rx*W*0.8+W*0.1;
+    const sy = (py-mny)/ry*H*0.8+H*0.1;
+    i===0 ? ctx.moveTo(sx,sy) : ctx.lineTo(sx,sy);
+  });
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+function drawMandelbrot(ctx, W, H, val, scheme) {
+  const maxIter = 60;
+  const cx0 = -0.7 + val*0.5, cy0 = val*0.3;
+  const zoom = 1.5 + val;
+  const imageData = ctx.createImageData(W, H);
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      const x0 = (px/W-0.5)*3.5/zoom + cx0;
+      const y0 = (py/H-0.5)*2.0/zoom + cy0;
+      let x=0,y=0,iter=0;
+      while (x*x+y*y<=4 && iter<maxIter){const xt=x*x-y*y+x0;y=2*x*y+y0;x=xt;iter++;}
+      const idx=(py*W+px)*4;
+      if(iter===maxIter){imageData.data[idx]=imageData.data[idx+1]=imageData.data[idx+2]=0;}
+      else{
+        const t=iter/maxIter;
+        if(scheme.fg){
+          const c=hexToRgb(scheme.fg);
+          imageData.data[idx]=c.r*t;imageData.data[idx+1]=c.g*t;imageData.data[idx+2]=c.b*t;
+        }else{
+          imageData.data[idx]=Math.floor(9*(1-t)*t*t*t*255);
+          imageData.data[idx+1]=Math.floor(15*(1-t)*(1-t)*t*t*255);
+          imageData.data[idx+2]=Math.floor(8.5*(1-t)*(1-t)*(1-t)*t*255);
+        }
+      }
+      imageData.data[idx+3]=255;
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function hexToRgb(hex){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return{r,g,b};
+}
+
+function drawHandSkeleton(canvas, phase) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, W, H);
+
+  const t = phase;
+  const cx = W/2, cy = H/2 + 20;
+  const scale = 110;
+
+  // Animated hand landmarks (21 points)
+  const lm = [
+    [cx, cy+scale*0.5],           // 0 wrist
+    [cx-scale*0.3, cy+scale*0.3], // 1
+    [cx-scale*0.35,cy+scale*0.1], // 2
+    [cx-scale*0.38,cy-scale*0.1], // 3
+    [cx-scale*0.4, cy-scale*0.25],// 4 thumb tip
+    [cx-scale*0.1, cy+scale*0.25+Math.sin(t)*3], // 5
+    [cx-scale*0.12,cy],           // 6
+    [cx-scale*0.13,cy-scale*0.2], // 7
+    [cx-scale*0.14,cy-scale*0.38],// 8 index tip
+    [cx+scale*0.02,cy+scale*0.22+Math.sin(t+0.3)*3], // 9
+    [cx+scale*0.01,cy-scale*0.05],// 10
+    [cx, cy-scale*0.25],          // 11
+    [cx, cy-scale*0.43],          // 12 middle tip
+    [cx+scale*0.13,cy+scale*0.24+Math.sin(t+0.6)*3], // 13
+    [cx+scale*0.14,cy],           // 14
+    [cx+scale*0.15,cy-scale*0.18],// 15
+    [cx+scale*0.16,cy-scale*0.35],// 16 ring tip
+    [cx+scale*0.26,cy+scale*0.28+Math.sin(t+0.9)*3], // 17
+    [cx+scale*0.28,cy+scale*0.1], // 18
+    [cx+scale*0.3, cy-scale*0.05],// 19
+    [cx+scale*0.31,cy-scale*0.18],// 20 pinky tip
+  ];
+
+  const connections = [
+    [0,1],[1,2],[2,3],[3,4],
+    [0,5],[5,6],[6,7],[7,8],
+    [0,9],[9,10],[10,11],[11,12],
+    [0,13],[13,14],[14,15],[15,16],
+    [0,17],[17,18],[18,19],[19,20],
+    [5,9],[9,13],[13,17],
+  ];
+
+  const fingerColors = ['#4488ff','#44ff88','#ff8844','#ffff44','#ff44ff'];
+  connections.forEach(([a,b]) => {
+    const fi = a<=4?0:a<=8?1:a<=12?2:a<=16?3:4;
+    ctx.strokeStyle = fingerColors[fi];
+    ctx.lineWidth = 2.5;
+    ctx.globalAlpha = 0.75;
+    ctx.beginPath();
+    ctx.moveTo(lm[a][0], lm[a][1]);
+    ctx.lineTo(lm[b][0], lm[b][1]);
+    ctx.stroke();
+  });
+
+  lm.forEach(([x,y], i) => {
+    ctx.globalAlpha = 1;
+    if (i === 0) {
+      ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fill();
+    } else if ([4,8,12,16,20].includes(i)) {
+      ctx.fillStyle = '#00ffff'; ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+    }
+  });
+  ctx.globalAlpha = 1;
+
+  // Quality bar overlay
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(8,8,260,80);
+  ctx.fillStyle = '#00ffff';
+  ctx.font = '12px Share Tech Mono, monospace';
+  const bv = (0.3 + Math.abs(Math.sin(t*0.2))*0.5).toFixed(4);
+  ctx.fillText(`Biometric: ${bv}`, 18, 30);
+  ctx.fillStyle = '#88ff88';
+  ctx.fillText(`Stability: 0.0${Math.floor(Math.abs(Math.sin(t))*15+5)}`, 18, 52);
+  ctx.fillStyle = '#00ff88';
+  ctx.fillText(`Quality: ${Math.min(99, Math.floor(75 + Math.sin(t*0.3)*15))}%`, 18, 74);
+}
+
+// ══════════════════════════════════════════
+//  REGISTRATION
+// ══════════════════════════════════════════
+function startRegistration() {
+  const username = document.getElementById('regUsername').value.trim();
+  if (!username) { showAlert(null, 'warn', 'Please enter a username.'); return; }
+  if (DB.users.find(u => u.username === username)) {
+    showAlert(null, 'err', `User "${username}" already exists.`); return; }
+
+  regState = { running: true, samples: 0, bioVal: 0, interval: null };
+  document.getElementById('regPlaceholder').style.display = 'none';
+  document.getElementById('regScanLine').style.display = 'block';
+  document.getElementById('regQualityWrap').style.display = 'block';
+  document.getElementById('regSamplesWrap').style.display = 'block';
+  document.getElementById('regMetrics').style.opacity = '1';
+  document.getElementById('regStartBtn').disabled = true;
+  document.getElementById('regFractalCard').style.display = 'none';
+
+  let phase = 0;
+  regState.interval = setInterval(() => {
+    phase += 0.08;
+    drawHandSkeleton(document.getElementById('handCanvas'), phase);
+
+    const quality = Math.min(99, Math.floor(65 + Math.sin(phase * 0.4) * 25 + Math.random() * 5));
+    const bioVal  = parseFloat((0.3 + Math.abs(Math.sin(phase * 0.18)) * 0.5).toFixed(4));
+    const stab    = parseFloat((Math.abs(Math.sin(phase)) * 0.03).toFixed(5));
+
+    document.getElementById('regQualityBar').style.width = quality + '%';
+    document.getElementById('regQualityPct').textContent = quality + '%';
+    document.getElementById('mBioVal').textContent = bioVal;
+    document.getElementById('mStability').textContent = stab;
+    document.getElementById('mQuality').textContent = quality + '%';
+
+    if (quality > 60 && regState.samples < 5) {
+      regState.samples++;
+      regState.bioVal = bioVal;
+      document.getElementById('regSampleBar').style.width = (regState.samples * 20) + '%';
+      document.getElementById('regSamplePct').textContent = regState.samples + '/5';
+    }
+
+    if (regState.samples >= 5) {
+      clearInterval(regState.interval);
+      completeRegistration(username, regState.bioVal);
+    }
+  }, 100);
+}
+
+function completeRegistration(username, bioVal) {
+  const fractalType = document.getElementById('regFractalType').value;
+  const colorScheme = document.getElementById('regColorScheme').value;
+  const now = new Date().toISOString().replace('T',' ').slice(0,19);
+
+  DB.users.push({ username, registered: now, fractalType, color: colorScheme, bioVal, attempts: 0, success: 0, failed: 0, locked: false });
+  DB.logs.push({ time: now.slice(11), type: 'REGISTER', user: username, msg: 'New user enrolled successfully', ok: true });
+
+  updateRightPanel();
+  updateVerUserSelect();
+
+  // Show fractal
+  document.getElementById('regFractalCard').style.display = 'block';
+  const fc = document.getElementById('regFractalCanvas');
+  drawFractal(fc, bioVal, fractalType, colorScheme);
+  document.getElementById('regSigId').textContent = 'SIG-' + Math.abs(Math.round(bioVal*99999)).toString(16).toUpperCase().padStart(8,'0');
+
+  // Result banner
+  const rb = document.getElementById('regResult');
+  rb.className = 'result-banner granted';
+  rb.style.display = 'block';
+  rb.innerHTML = `<div class="result-title">REGISTRATION COMPLETE</div><div class="result-sub">User "${username}" enrolled · BioVal: ${bioVal} · Fractal: ${fractalType}</div>`;
+
+  document.getElementById('regStartBtn').disabled = false;
+  document.getElementById('regScanLine').style.display = 'none';
+
+  addGalleryItem(username, bioVal, fractalType, colorScheme);
+}
+
+function resetRegistration() {
+  clearInterval(regState.interval);
+  regState = { running: false, samples: 0, bioVal: 0, interval: null };
+  const c = document.getElementById('handCanvas');
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  document.getElementById('regPlaceholder').style.display = 'flex';
+  document.getElementById('regScanLine').style.display = 'none';
+  document.getElementById('regQualityWrap').style.display = 'none';
+  document.getElementById('regSamplesWrap').style.display = 'none';
+  document.getElementById('regMetrics').style.opacity = '0.3';
+  document.getElementById('regResult').style.display = 'none';
+  document.getElementById('regFractalCard').style.display = 'none';
+  document.getElementById('regStartBtn').disabled = false;
+  document.getElementById('regUsername').value = '';
+}
+
+// ══════════════════════════════════════════
+//  VERIFICATION
+// ══════════════════════════════════════════
+function updateVerUserSelect() {
+  const sel = document.getElementById('verUserSelect');
+  sel.innerHTML = '<option value="">-- select user --</option>';
+  DB.users.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.username; opt.textContent = u.username;
+    sel.appendChild(opt);
+  });
+}
+
+function onVerUserChange() {
+  const username = document.getElementById('verUserSelect').value;
+  if (!username) return;
+  const user = DB.users.find(u => u.username === username);
+  if (!user) return;
+  const ec = document.getElementById('verEnrolledFractal');
+  drawFractal(ec, user.bioVal, user.fractalType, user.color);
+}
+
+function startVerification() {
+  const username = document.getElementById('verUserSelect').value;
+  if (!username) { return; }
+  const user = DB.users.find(u => u.username === username);
+  if (!user) return;
+  if (user.locked) {
+    const rb = document.getElementById('verResult');
+    rb.className = 'result-banner denied'; rb.style.display = 'block';
+    rb.innerHTML = `<div class="result-title">USER LOCKED</div><div class="result-sub">Account temporarily locked due to failed attempts.</div>`;
+    return;
+  }
+
+  clearInterval(verState.interval);
+  verState.running = true;
+  document.getElementById('verPlaceholder').style.display = 'none';
+  document.getElementById('verScanLine').style.display = 'block';
+  document.getElementById('verConfWrap').style.display = 'block';
+  document.getElementById('verResult').style.display = 'none';
+  document.getElementById('verStartBtn').disabled = true;
+
+  let phase = 0, tick = 0;
+  verState.interval = setInterval(() => {
+    phase += 0.08; tick++;
+    drawHandSkeleton(document.getElementById('verCanvas'), phase);
+
+    const conf = Math.min(99, Math.floor(70 + Math.sin(phase*0.3)*20 + Math.random()*5));
+    const bar = document.getElementById('verConfBar');
+    bar.style.width = conf + '%';
+    bar.className = 'progress-bar ' + (conf >= 80 ? 'green' : conf >= 60 ? '' : 'red');
+    document.getElementById('verConfPct').textContent = conf + '%';
+
+    const lc = document.getElementById('verLiveFractal');
+    const liveBio = user.bioVal + (Math.random()-0.5)*0.05;
+    if (tick % 5 === 0) drawFractal(lc, Math.max(0,Math.min(1,liveBio)), user.fractalType, user.color);
+
+    if (tick >= 30) {
+      clearInterval(verState.interval);
+      const finalConf = Math.floor(85 + Math.random()*12);
+      const granted = finalConf >= parseInt(document.getElementById('thresholdRange').value);
+      completeVerification(user, finalConf, granted);
+    }
+  }, 100);
+}
+
+function completeVerification(user, conf, granted) {
+  const now = new Date().toTimeString().slice(0,8);
+  user.attempts++;
+  DB.verStats.attempts++;
+  DB.verStats.totalConf += conf;
+
+  if (granted) {
+    user.success++;
+    DB.verStats.success++;
+    document.getElementById('verMatchIcon').textContent = '✓';
+    document.getElementById('verMatchIcon').style.color = '#00ff88';
+  } else {
+    user.failed++;
+    document.getElementById('verMatchIcon').textContent = '✗';
+    document.getElementById('verMatchIcon').style.color = '#ff3355';
+  }
+
+  document.getElementById('verMatchPct').textContent = conf + '%';
+  document.getElementById('verScanLine').style.display = 'none';
+
+  const rb = document.getElementById('verResult');
+  rb.className = 'result-banner ' + (granted ? 'granted' : 'denied');
+  rb.style.display = 'block';
+  rb.innerHTML = `<div class="result-title">${granted ? 'ACCESS GRANTED' : 'ACCESS DENIED'}</div>
+    <div class="result-sub">User: ${user.username} · Confidence: ${conf}% · ${granted ? 'Authentication successful' : 'Confidence below threshold'}</div>`;
+
+  DB.logs.push({ time: now, type: 'LOGIN', user: user.username, msg: `Access ${granted?'granted':'DENIED'} — confidence ${conf}%`, ok: granted });
+  DB.secEvents.unshift({ sev: granted?'info':'high', user: user.username, event: granted?'LOGIN_SUCCESS':'LOGIN_FAILED', detail: `Confidence: ${conf}%`, time: now });
+
+  // Update stats panel
+  document.getElementById('vAttempts').textContent = DB.verStats.attempts;
+  document.getElementById('vSuccessRate').textContent = Math.round(DB.verStats.success/DB.verStats.attempts*100) + '%';
+  document.getElementById('vAvgConf').textContent = Math.round(DB.verStats.totalConf/DB.verStats.attempts) + '%';
+  document.getElementById('vLastAttempt').textContent = now;
+  document.getElementById('rpLastLogin').textContent = user.username;
+
+  document.getElementById('verStartBtn').disabled = false;
+}
+
+// ══════════════════════════════════════════
+//  FRACTAL LAB
+// ══════════════════════════════════════════
+function updateFractalLab() {
+  const bio = parseInt(document.getElementById('bioSlider').value) / 100;
+  const ft = document.getElementById('labFractalType').value;
+  const cs = document.getElementById('labColor').value;
+  const canvas = document.getElementById('labCanvas');
+  drawFractal(canvas, bio, ft, cs);
+  const seed = Math.abs(Math.round(bio * 99999999)) % 2147483647;
+  document.getElementById('labSeed').textContent = seed.toString(16).toUpperCase().padStart(8,'0');
+  document.getElementById('labDim').textContent = (1.5 + bio*0.5).toFixed(4);
+}
+
+function runFractalAnalysis() {
+  const bio = parseInt(document.getElementById('bioSlider').value) / 100;
+  const classes = ['Linear','Branching','Symmetric','Spiral','Complex'];
+  const cls = bio < 0.2 ? classes[0] : bio < 0.4 ? classes[1] : bio < 0.6 ? classes[2] : bio < 0.8 ? classes[3] : classes[4];
+  const ent = (-bio*Math.log(Math.max(bio,1e-10)) - (1-bio)*Math.log(Math.max(1-bio,1e-10))).toFixed(4);
+  document.getElementById('aBioVal').textContent = bio.toFixed(4);
+  document.getElementById('aComplex').textContent = (bio*100).toFixed(2);
+  document.getElementById('aUnique').textContent = ((1-Math.abs(bio-0.5))*100).toFixed(2) + '%';
+  document.getElementById('aFracDim').textContent = (1.5+bio*0.5).toFixed(4);
+  document.getElementById('aEntropy').textContent = ent;
+  document.getElementById('aPattern').textContent = cls;
+  document.getElementById('labAnalysis').style.display = 'block';
+}
+
+// ══════════════════════════════════════════
+//  USERS TABLE
+// ══════════════════════════════════════════
+function renderUsers() {
+  const tb = document.getElementById('usersTable');
+  tb.innerHTML = '';
+  DB.users.forEach((u,i) => {
+    const sr = u.attempts ? Math.round(u.success/u.attempts*100) : 100;
+    tb.innerHTML += `<tr>
+      <td style="font-weight:600;color:var(--text)">${u.username}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--dim)">${u.registered}</td>
+      <td>${u.fractalType}</td>
+      <td style="font-family:'Share Tech Mono',monospace;color:var(--gold)">${u.bioVal.toFixed(4)}</td>
+      <td>${u.locked ? '<span class="badge badge-red">LOCKED</span>' : '<span class="badge badge-green">ACTIVE</span>'}</td>
+      <td>
+        <button class="btn btn-outline" style="padding:3px 10px;font-size:0.7rem;margin-right:4px" onclick="viewUser(${i})">VIEW</button>
+        <button class="btn btn-danger" style="padding:3px 10px;font-size:0.7rem" onclick="deleteUser(${i})">DELETE</button>
+      </td>
+    </tr>`;
+  });
+}
+
+function deleteUser(i) {
+  if (!confirm(`Delete user "${DB.users[i].username}"?`)) return;
+  const u = DB.users[i];
+  DB.logs.push({ time: new Date().toTimeString().slice(0,8), type: 'DELETE', user: u.username, msg: 'User deleted from system', ok: true });
+  DB.users.splice(i, 1);
+  renderUsers(); updateRightPanel(); updateVerUserSelect();
+  const a = document.getElementById('usersAlert');
+  a.className = 'alert alert-ok show';
+  a.textContent = `User "${u.username}" deleted.`;
+  setTimeout(() => a.className = 'alert', 3000);
+}
+
+function viewUser(i) {
+  const u = DB.users[i];
+  alert(`User: ${u.username}\nBio Value: ${u.bioVal}\nFractal: ${u.fractalType}\nColor: ${u.color}\nAttempts: ${u.attempts}\nSuccess: ${u.success} | Failed: ${u.failed}\nRegistered: ${u.registered}`);
+}
+
+// ══════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════
+function renderStats() {
+  const total = DB.users.reduce((a,u) => a+u.attempts, 0);
+  const succ  = DB.users.reduce((a,u) => a+u.success, 0);
+  document.getElementById('sTotalUsers').textContent = DB.users.length;
+  document.getElementById('sTotalAttempts').textContent = total;
+  document.getElementById('sSuccessRate').textContent = total ? Math.round(succ/total*100)+'%' : '—';
+
+  // Mini bar chart
+  const chart = document.getElementById('dailyChart');
+  chart.innerHTML = '';
+  const vals = [3,7,5,12,9,6,total||8];
+  const mx = Math.max(...vals);
+  vals.forEach(v => {
+    const b = document.createElement('div');
+    b.className = 'mini-bar';
+    b.style.height = (v/mx*100)+'%';
+    chart.appendChild(b);
+  });
+
+  // Pie chart
+  const pc = document.getElementById('pieCanvas');
+  const ctx = pc.getContext('2d');
+  ctx.clearRect(0,0,pc.width,pc.height);
+  const failed = total - succ;
+  const cx=pc.width/2, cy=pc.height/2, r=65;
+  if (total > 0) {
+    const sAngle = -Math.PI/2;
+    const sSlice = (succ/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,sAngle,sAngle+sSlice);
+    ctx.fillStyle='#00ff88'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,sAngle+sSlice,sAngle+Math.PI*2);
+    ctx.fillStyle='#ff3355'; ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle='#2a2a2a'; ctx.fill();
+  }
+  ctx.font='12px Rajdhani,sans-serif'; ctx.fillStyle='#c8c8c8'; ctx.textAlign='center';
+  ctx.fillText(`✓ ${succ} / ✗ ${failed}`, cx, cy+r+22);
+
+  // User table
+  const tb = document.getElementById('statsTable');
+  tb.innerHTML = '';
+  DB.users.forEach(u => {
+    const sr = u.attempts ? Math.round(u.success/u.attempts*100) : 100;
+    const avgC = u.attempts ? Math.floor(75+Math.random()*20) : '—';
+    tb.innerHTML += `<tr>
+      <td style="font-weight:600">${u.username}</td>
+      <td style="font-family:'Share Tech Mono',monospace">${u.attempts}</td>
+      <td style="color:var(--green)">${u.success}</td>
+      <td style="color:var(--red)">${u.failed}</td>
+      <td style="font-family:'Share Tech Mono',monospace;color:var(--gold)">${avgC}%</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--dim)">${u.registered.slice(11)}</td>
+    </tr>`;
+  });
+}
+
+// ══════════════════════════════════════════
+//  SECURITY
+// ══════════════════════════════════════════
+function renderSecurity() {
+  const crit = DB.secEvents.filter(e=>e.sev==='critical').length;
+  const high = DB.secEvents.filter(e=>e.sev==='high').length;
+  const info = DB.secEvents.filter(e=>e.sev==='info').length;
+  document.getElementById('secCritical').textContent = crit;
+  document.getElementById('secHigh').textContent = high;
+  document.getElementById('secInfo').textContent = info;
+  document.getElementById('rpSecEvents').textContent = DB.secEvents.length;
+
+  const list = document.getElementById('secEventList');
+  list.innerHTML = '';
+  DB.secEvents.slice(0,20).forEach(e => {
+    list.innerHTML += `<div class="event-row">
+      <div class="sev-dot sev-${e.sev}"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim);min-width:55px">${e.time}</div>
+      <div style="min-width:65px"><span class="badge ${e.sev==='critical'?'badge-red':e.sev==='high'?'badge-red':'badge-gold'}" style="font-size:0.58rem">${e.sev.toUpperCase()}</span></div>
+      <div style="flex:1"><span style="color:var(--gold);font-size:0.8rem">${e.user}</span> — <span style="color:var(--dim);font-size:0.75rem">${e.event}</span></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:var(--dim)">${e.detail}</div>
+    </div>`;
+  });
+
+  const locked = DB.users.filter(u => u.locked);
+  document.getElementById('lockedList').textContent = locked.length
+    ? locked.map(u=>u.username).join(', ')
+    : 'No locked users.';
+}
+
+// ══════════════════════════════════════════
+//  LOGS
+// ══════════════════════════════════════════
+function renderLogs() {
+  const ls = document.getElementById('logStream');
+  ls.innerHTML = '';
+  [...DB.logs].reverse().forEach(l => {
+    const color = l.type==='REGISTER'?'var(--gold)':l.ok?'var(--green)':'var(--red)';
+    ls.innerHTML += `<div class="log-entry">
+      <span class="log-time">${l.time}</span>
+      <span class="log-type" style="color:${color}">${l.type}</span>
+      <span style="color:var(--gold2);min-width:70px">${l.user}</span>
+      <span class="log-msg">${l.msg}</span>
+    </div>`;
+  });
+}
+
+function clearLogs() { DB.logs = []; renderLogs(); }
+
+// ══════════════════════════════════════════
+//  BACKUP
+// ══════════════════════════════════════════
+function renderBackups() {
+  const tb = document.getElementById('backupTable');
+  tb.innerHTML = '';
+  DB.backups.forEach((b,i) => {
+    tb.innerHTML += `<tr>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text)">${b.name}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--dim)">${b.time}</td>
+      <td style="color:var(--gold)">${b.size}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--dim)">${b.hash}</td>
+      <td><button class="btn btn-outline" style="padding:3px 10px;font-size:0.7rem" onclick="restoreBackup(${i})">RESTORE</button></td>
+    </tr>`;
+  });
+}
+
+function createBackup() {
+  const now = new Date();
+  const ts = now.toISOString().replace(/[-:T]/g,'').slice(0,15);
+  const name = `backup_${ts}.json`;
+  const hash = Math.random().toString(16).slice(2,10) + '...' + Math.random().toString(16).slice(2,6);
+  DB.backups.unshift({ name, time: now.toISOString().replace('T',' ').slice(0,19), size: (3+Math.random()*2).toFixed(1)+' KB', hash });
+  DB.secEvents.unshift({ sev:'info', user:'SYSTEM', event:'BACKUP_CREATED', detail: name, time: now.toTimeString().slice(0,8) });
+  document.getElementById('rpBackups').textContent = DB.backups.length;
+  renderBackups();
+  const a = document.getElementById('backupAlert');
+  a.className = 'alert alert-ok show';
+  a.textContent = `Backup created: ${name}`;
+  setTimeout(() => a.className='alert', 4000);
+}
+
+function restoreBackup(i) {
+  if (!confirm(`Restore from "${DB.backups[i].name}"?`)) return;
+  const a = document.getElementById('backupAlert');
+  a.className = 'alert alert-ok show';
+  a.textContent = `Restored from ${DB.backups[i].name} — integrity verified ✓`;
+  setTimeout(() => a.className='alert', 4000);
+}
+
+// ══════════════════════════════════════════
+//  GALLERY / RIGHT PANEL
+// ══════════════════════════════════════════
+function addGalleryItem(username, bioVal, fractalType, colorScheme) {
+  const list = document.getElementById('galleryList');
+  const item = document.createElement('div');
+  item.className = 'mini-fractal-item';
+  item.innerHTML = `<canvas class="mini-thumb" width="40" height="40"></canvas>
+    <div class="mini-info">
+      <div class="mini-name">${username}</div>
+      <div class="mini-meta">${fractalType} · ${colorScheme}</div>
+    </div>`;
+  list.insertBefore(item, list.firstChild);
+  drawFractal(item.querySelector('canvas'), bioVal, fractalType, colorScheme);
+}
+
+function updateRightPanel() {
+  document.getElementById('rpUsers').textContent = DB.users.length;
+  document.getElementById('userCount').textContent = DB.users.length;
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+function showAlert(id, type, msg) {
+  const types = { warn:'alert-warn', ok:'alert-ok', err:'alert-err' };
+  alert(`[${type.toUpperCase()}] ${msg}`);
+}
+
+updateVerUserSelect();
+updateRightPanel();
+updateFractalLab();
+document.getElementById('rpBackups').textContent = DB.backups.length;
+
+// Render initial gallery from existing users
+DB.users.forEach(u => addGalleryItem(u.username, u.bioVal, u.fractalType, u.color));
+
+// Initial fractal lab draw
+setTimeout(updateFractalLab, 300);
+</script>
+</body>
+</html>
